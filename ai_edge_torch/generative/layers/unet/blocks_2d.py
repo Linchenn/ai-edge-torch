@@ -90,19 +90,11 @@ class ResidualBlock2D(nn.Module):
     return x
 
 
-class AttentionBlock2D(nn.Module):
-  """2D self attention block
-
-  x = SelfAttention(Norm(input_tensor)) + x
-
+class SampleSdpaBlock(nn.Module):
+  """Sample attention block with SDPA
   """
 
   def __init__(self, config: unet_cfg.AttentionBlock2DConfig):
-    """Initialize an instance of the AttentionBlock2D.
-
-    Args:
-      config (unet_cfg.AttentionBlock2DConfig): the configuration of this block.
-    """
     super().__init__()
     self.config = config
     self.norm = layers_builder.build_norm(config.dim, config.normalization_config)
@@ -115,30 +107,14 @@ class AttentionBlock2D(nn.Module):
     )
 
   def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
-    """Forward function of the AttentionBlock2D.
-
-    Args:
-      input_tensor (torch.Tensor): the input tensor.
-
-    Returns:
-      output activation tensor after self attention.
-    """
-    residual = input_tensor
     B, C, H, W = input_tensor.shape
     x = input_tensor
-    if self.config.normalization_config.type == layers_cfg.NormalizationType.GROUP_NORM:
-      x = self.norm(x)
-      x = input_tensor.view(B, C, H * W)
-      x = x.transpose(-1, -2)
-    else:
-      x = input_tensor.view(B, C, H * W)
-      x = x.transpose(-1, -2)
-      x = self.norm(x)
-    x = x.contiguous()  # Prevent BATCH_MATMUL op in converted tflite.
+    x = input_tensor.view(B, C, H * W)
+    x = x.transpose(-1, -2)
+    # x = x.contiguous()  # Prevent BATCH_MATMUL op in converted tflite.
     x = self.attention(x)
     x = x.transpose(-1, -2)
     x = x.view(B, C, H, W)
-    x = x + residual
     return x
 
 
@@ -709,3 +685,30 @@ class MidBlock2D(nn.Module):
         hidden_states = self.transformers[i](hidden_states, context_tensor)
       hidden_states = resnet(hidden_states, time_emb)
     return hidden_states
+
+def get_model_config() -> unet_cfg.AttentionBlock2DConfig:
+  """Get configs for the Decoder of Stable Diffusion v1.5"""
+  in_channels = 3
+  latent_channels = 4
+  out_channels = 3
+  block_out_channels = [128, 256, 512, 512]
+  scaling_factor = 0.18215
+  layers_per_block = 3
+
+  norm_config = layers_cfg.NormalizationConfig(
+      layers_cfg.NormalizationType.GROUP_NORM, group_num=32
+  )
+
+  return unet_cfg.AttentionBlock2DConfig(
+      dim=block_out_channels[-1],
+      normalization_config=norm_config,
+      attention_config=layers_cfg.AttentionConfig(
+          num_heads=1,
+          num_query_groups=1,
+          qkv_use_bias=True,
+          output_proj_use_bias=True,
+          enable_kv_cache=False,
+          qkv_transpose_before_split=True,
+          rotary_percentage=0.0,
+      ),
+  )
