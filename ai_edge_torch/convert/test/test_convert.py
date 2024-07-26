@@ -31,22 +31,21 @@ class demo(unittest.TestCase):
   class MySdpa(torch.nn.Module):
 
     def forward(self, q, k, v, mask):
-      return scaled_dot_product_attention_with_hlfb(q, k, v, 4, mask)
+      return scaled_dot_product_attention_with_hlfb(q, k, v, 40, mask)
 
   args = (
-      torch.randn((1, 4, 8, 4)),
-      torch.randn((1, 4, 8, 4)),
-      torch.randn((1, 4, 8, 4)),
-      torch.randn((1, 1, 4, 4)),
+      torch.randn((2, 4096, 8, 40)),
+      torch.randn((2, 4096, 8, 40)),
+      torch.randn((2, 4096, 8, 40)),
+      torch.zeros((2, 1, 4096, 4096), dtype=torch.float32),
   )
   torch_module = MySdpa().eval()
-  q = torch.randn((1, 4, 8, 4))
-  k = torch.randn((1, 4, 8, 4))
-  v = torch.randn((1, 4, 8, 4))
-  mask = torch.zeros((1, 1, 4, 4), dtype=torch.float32)
+  q = torch.randn((2, 4096, 8, 40))
+  k = torch.randn((2, 4096, 8, 40))
+  v = torch.randn((2, 4096, 8, 40))
+  mask = torch.zeros((2, 1, 4096, 4096), dtype=torch.float32)
   out = torch_module(q, k, v, mask)
-  print(out)
-  edge_model = ai_edge_torch.convert(torch_module, args).export('/tmp/stable_diffusion/sdpa.tflite')
+  edge_model = ai_edge_torch.convert(torch_module, args).export('/tmp/sdpa.tflite')
 
 
 if __name__ == "__main__":
