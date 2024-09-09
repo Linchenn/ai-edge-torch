@@ -280,7 +280,7 @@ def get_model_config() -> unet_cfg.AutoEncoderConfig:
   layers_per_block = 3
 
   norm_config = layers_cfg.NormalizationConfig(
-      layers_cfg.NormalizationType.GROUP_NORM, group_num=32
+      layers_cfg.NormalizationType.GROUP_NORM, group_num=32, enable_hlfb=True
   )
 
   att_config = unet_cfg.AttentionBlock2DConfig(
