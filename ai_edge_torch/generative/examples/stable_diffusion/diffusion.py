@@ -590,7 +590,7 @@ def get_model_config(batch_size: int) -> unet_cfg.DiffusionModelConfig:
 
   # Residual configs.
   residual_norm_config = layers_cfg.NormalizationConfig(
-      layers_cfg.NormalizationType.GROUP_NORM, group_num=32
+      layers_cfg.NormalizationType.GROUP_NORM, group_num=32, enable_hlfb=True
   )
   residual_activation_type = layers_cfg.ActivationType.SILU
 
@@ -599,10 +599,10 @@ def get_model_config(batch_size: int) -> unet_cfg.DiffusionModelConfig:
   transformer_batch_size = batch_size
   transformer_cross_attention_dim = 768  # Embedding fomr CLIP model
   transformer_pre_conv_norm_config = layers_cfg.NormalizationConfig(
-      layers_cfg.NormalizationType.GROUP_NORM, epsilon=1e-6, group_num=32
+      layers_cfg.NormalizationType.GROUP_NORM, epsilon=1e-6, group_num=32, enable_hlfb=True
   )
   transformer_norm_config = layers_cfg.NormalizationConfig(
-      layers_cfg.NormalizationType.LAYER_NORM
+      layers_cfg.NormalizationType.LAYER_NORM, enable_hlfb=True
   )
   transformer_ff_activation_type = layers_cfg.ActivationType.GE_GLU
 
@@ -615,7 +615,7 @@ def get_model_config(batch_size: int) -> unet_cfg.DiffusionModelConfig:
 
   # Finaly layer configs.
   final_norm_config = layers_cfg.NormalizationConfig(
-      layers_cfg.NormalizationType.GROUP_NORM, group_num=32
+      layers_cfg.NormalizationType.GROUP_NORM, group_num=32, enable_hlfb=True
   )
   final_activation_type = layers_cfg.ActivationType.SILU
 
