@@ -113,33 +113,31 @@ def convert_stable_diffusion_to_tflite(
   if not os.path.exists(output_dir):
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
-  quant_config = (
-      quant_recipes.full_int8_weight_only_recipe() if quantize else None
-  )
+#   quant_config = (
+#       quant_recipes.full_int8_weight_only_recipe() if quantize else None
+#   )
 
-  # TODO(yichunk): convert to multi signature tflite model.
-  # CLIP text encoder
-  ai_edge_torch.signature('encode', clip_model, (prompt_tokens,)).convert(
-      quant_config=quant_config
-  ).export(f'{output_dir}/clip.tflite')
+#   # TODO(yichunk): convert to multi signature tflite model.
+#   # CLIP text encoder
+#   ai_edge_torch.signature('encode', clip_model, (prompt_tokens,)).convert(
+#       quant_config=quant_config
+#   ).export(f'{output_dir}/clip.tflite')
 
-  # TODO(yichunk): enable image encoder conversion
-  # Image encoder
-  # ai_edge_torch.signature('encode', encoder, (input_image, noise)).convert(quant_config=quant_config).export(
-  #     f'{output_dir}/encoder.tflite'
-  # )
+#   # TODO(yichunk): enable image encoder conversion
+#   # Image encoder
+#   # ai_edge_torch.signature('encode', encoder, (input_image, noise)).convert(quant_config=quant_config).export(
+#   #     f'{output_dir}/encoder.tflite'
+#   # )
 
-  # Diffusion
-  ai_edge_torch.signature(
-      'diffusion',
-      diffusion_model,
-      (torch.repeat_interleave(input_latents, 2, 0), context, time_embedding),
-  ).convert(quant_config=quant_config).export(f'{output_dir}/diffusion.tflite')
+#   # Diffusion
+#   ai_edge_torch.signature(
+#       'diffusion',
+#       diffusion_model,
+#       (torch.repeat_interleave(input_latents, 2, 0), context, time_embedding),
+#   ).convert(quant_config=quant_config).export(f'{output_dir}/diffusion.tflite')
 
   # Image decoder
-  ai_edge_torch.signature('decode', decoder_model, (input_latents,)).convert(
-      quant_config=quant_config
-  ).export(f'{output_dir}/decoder.tflite')
+  ai_edge_torch.signature('decode', decoder_model, (input_latents,)).convert().export(f'{output_dir}/decoder.tflite')
 
 
 if __name__ == '__main__':
