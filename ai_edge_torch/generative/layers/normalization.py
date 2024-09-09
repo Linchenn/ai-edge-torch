@@ -66,12 +66,14 @@ class RMSNorm(torch.nn.Module):
 class GroupNorm(torch.nn.Module):
 
   def __init__(self, group_num: int, dim: int, eps: float = 1e-6, enable_hlfb: bool = False):
-    """Initialize the RMSNorm layer.
+    """Initialize the GroupNorm layer.
 
     Args:
-      dim (int): dimension of the input tensor.
+      group_num (): Number of groups to separate the channels into.
+      dim (int): Dimension of the input tensor.
       eps (float): A small float value to ensure numerical stability (default:
         1e-6).
+      enable_hlfb (bool): Whether to convert this normalization into a single op.
     """
     super().__init__()
     self.enable_hlfb = enable_hlfb
@@ -80,13 +82,13 @@ class GroupNorm(torch.nn.Module):
     self.norm = nn.GroupNorm(group_num, dim, eps)
 
   def forward(self, x):
-    """Running the forward pass of RMSNorm layer.
+    """Running the forward pass of GroupNorm layer.
 
     Args:
       x (torch.Tensor): input tensor.
 
     Returns:
-      torch.Tensor: output tensor after applying RMSNorm.
+      torch.Tensor: output tensor after applying GroupNorm.
     """
     if self.enable_hlfb:
       return group_norm_with_hlfb(
@@ -103,12 +105,13 @@ class GroupNorm(torch.nn.Module):
 class LayerNorm(torch.nn.Module):
 
   def __init__(self, dim: int, eps: float = 1e-6, enable_hlfb: bool = False):
-    """Initialize the RMSNorm layer.
+    """Initialize the LayerNorm layer.
 
     Args:
       dim (int): dimension of the input tensor.
       eps (float): A small float value to ensure numerical stability (default:
         1e-6).
+      enable_hlfb (bool): Whether to convert this normalization into a single op.
     """
     super().__init__()
     self.enable_hlfb = enable_hlfb
@@ -116,13 +119,13 @@ class LayerNorm(torch.nn.Module):
     self.norm = nn.LayerNorm(dim, eps=eps)
 
   def forward(self, x):
-    """Running the forward pass of RMSNorm layer.
+    """Running the forward pass of LayerNorm layer.
 
     Args:
       x (torch.Tensor): input tensor.
 
     Returns:
-      torch.Tensor: output tensor after applying RMSNorm.
+      torch.Tensor: output tensor after applying LayerNorm.
     """
     if self.enable_hlfb:
       return layer_norm_with_hlfb(
