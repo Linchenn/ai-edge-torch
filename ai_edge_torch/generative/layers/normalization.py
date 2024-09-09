@@ -15,6 +15,8 @@
 # Common normalization layers.
 
 import torch
+import torch.nn.functional as F
+from ai_edge_torch.hlfb import StableHLOCompositeBuilder
 
 
 # Implementation for RMSNorm from: https://arxiv.org/abs/1910.07467
@@ -58,3 +60,38 @@ class RMSNorm(torch.nn.Module):
       return output * (1 + self.weight)
     else:
       return output * self.weight
+
+def group_norm_with_hlfb(
+    x: torch.Tensor,
+    w: torch.Tensor,
+    b: torch.Tensor,
+    num_groups: int,
+    eps: float,
+):
+  x = torch.permute(x, (0, 2, 3, 1))
+
+  builder = StableHLOCompositeBuilder(
+      name="odml.group_norm", attr={"num_groups": num_groups, "eps": eps}
+  )
+  x, w, b = builder.mark_inputs(x, w, b)
+  x = torch.permute(x, (0, 3, 1, 2))
+  y = F.group_norm(x, num_groups, weight=w, bias=b, eps=eps)
+  y = torch.permute(y, (0, 2, 3, 1))
+  y = builder.mark_outputs(y)
+
+  y = torch.permute(y, (0, 3, 1, 2))
+  return y
+
+def layer_norm_with_hlfb(
+    x: torch.Tensor,
+    w: torch.Tensor,
+    b: torch.Tensor,
+    eps: float,
+):
+  builder = StableHLOCompositeBuilder(
+      name="odml.layer_norm", attr={"eps": eps}
+  )
+  x, w, b = builder.mark_inputs(x, w, b)
+  y = F.layer_norm(x, x.shape, weight=w.broadcast_to(x.shape), bias=b.broadcast_to(x.shape), eps=eps)
+  y = builder.mark_outputs(y)
+  return y

@@ -108,6 +108,7 @@ class NormalizationConfig:
   zero_centered: bool = False
   # Number of groups used in group normalization.
   group_num: Optional[float] = None
+  enable_hlfb: bool = False
 
 
 @dataclass
