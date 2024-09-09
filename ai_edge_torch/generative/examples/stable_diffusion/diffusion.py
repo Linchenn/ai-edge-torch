@@ -331,7 +331,7 @@ class Diffusion(nn.Module):
                                 dim=output_channel,
                                 num_query_groups=config.transformer_num_attention_heads,
                             ),
-                            enable_hlfb=False,
+                            enable_hlfb=True,
                         ),
                         cross_attention_block_config=unet_cfg.CrossAttentionBlock2DConfig(
                             query_dim=output_channel,
@@ -343,7 +343,7 @@ class Diffusion(nn.Module):
                                 dim=output_channel,
                                 num_query_groups=config.transformer_num_attention_heads,
                             ),
-                            enable_hlfb=False,
+                            enable_hlfb=True,
                         ),
                         pre_conv_normalization_config=config.transformer_pre_conv_norm_config,
                         feed_forward_block_config=unet_cfg.FeedForwardBlock2DConfig(
@@ -401,7 +401,7 @@ class Diffusion(nn.Module):
                         dim=mid_block_channels,
                         num_query_groups=config.transformer_num_attention_heads,
                     ),
-                    enable_hlfb=False,
+                    enable_hlfb=True,
                 ),
                 cross_attention_block_config=unet_cfg.CrossAttentionBlock2DConfig(
                     query_dim=mid_block_channels,
@@ -413,7 +413,7 @@ class Diffusion(nn.Module):
                         dim=mid_block_channels,
                         num_query_groups=config.transformer_num_attention_heads,
                     ),
-                    enable_hlfb=False,
+                    enable_hlfb=True,
                 ),
                 pre_conv_normalization_config=config.transformer_pre_conv_norm_config,
                 feed_forward_block_config=unet_cfg.FeedForwardBlock2DConfig(
@@ -472,7 +472,7 @@ class Diffusion(nn.Module):
                                 dim=output_channel,
                                 num_query_groups=config.transformer_num_attention_heads,
                             ),
-                            enable_hlfb=False,
+                            enable_hlfb=True,
                         ),
                         cross_attention_block_config=unet_cfg.CrossAttentionBlock2DConfig(
                             query_dim=output_channel,
@@ -484,7 +484,7 @@ class Diffusion(nn.Module):
                                 dim=output_channel,
                                 num_query_groups=config.transformer_num_attention_heads,
                             ),
-                            enable_hlfb=False,
+                            enable_hlfb=True,
                         ),
                         pre_conv_normalization_config=config.transformer_pre_conv_norm_config,
                         feed_forward_block_config=unet_cfg.FeedForwardBlock2DConfig(
