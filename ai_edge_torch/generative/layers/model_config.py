@@ -104,11 +104,11 @@ class NormalizationConfig:
   """Normalizater parameters."""
 
   type: NormalizationType = NormalizationType.NONE
+  enable_hlfb: bool = False
   epsilon: float = 1e-5
   zero_centered: bool = False
   # Number of groups used in group normalization.
   group_num: Optional[float] = None
-  enable_hlfb: bool = False
 
 
 @dataclass

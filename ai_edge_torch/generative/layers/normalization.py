@@ -16,6 +16,7 @@
 
 import torch
 import torch.nn.functional as F
+from torch import nn
 from ai_edge_torch.hlfb import StableHLOCompositeBuilder
 
 
@@ -60,6 +61,78 @@ class RMSNorm(torch.nn.Module):
       return output * (1 + self.weight)
     else:
       return output * self.weight
+
+
+class GroupNorm(torch.nn.Module):
+
+  def __init__(self, group_num: int, dim: int, eps: float = 1e-6, enable_hlfb: bool = False):
+    """Initialize the RMSNorm layer.
+
+    Args:
+      dim (int): dimension of the input tensor.
+      eps (float): A small float value to ensure numerical stability (default:
+        1e-6).
+    """
+    super().__init__()
+    self.enable_hlfb = enable_hlfb
+    self.group_num = group_num
+    self.eps = eps
+    self.norm = nn.GroupNorm(group_num, dim, eps)
+
+  def forward(self, x):
+    """Running the forward pass of RMSNorm layer.
+
+    Args:
+      x (torch.Tensor): input tensor.
+
+    Returns:
+      torch.Tensor: output tensor after applying RMSNorm.
+    """
+    if self.enable_hlfb:
+      return group_norm_with_hlfb(
+          x,
+          self.norm.weight,
+          self.norm.bias,
+          self.group_num,
+          self.eps,
+      )
+    else:
+      return self.norm(x)
+
+
+class LayerNorm(torch.nn.Module):
+
+  def __init__(self, dim: int, eps: float = 1e-6, enable_hlfb: bool = False):
+    """Initialize the RMSNorm layer.
+
+    Args:
+      dim (int): dimension of the input tensor.
+      eps (float): A small float value to ensure numerical stability (default:
+        1e-6).
+    """
+    super().__init__()
+    self.enable_hlfb = enable_hlfb
+    self.eps = eps
+    self.norm = nn.LayerNorm(dim, eps=eps)
+
+  def forward(self, x):
+    """Running the forward pass of RMSNorm layer.
+
+    Args:
+      x (torch.Tensor): input tensor.
+
+    Returns:
+      torch.Tensor: output tensor after applying RMSNorm.
+    """
+    if self.enable_hlfb:
+      return layer_norm_with_hlfb(
+          x,
+          self.norm.weight,
+          self.norm.bias,
+          self.eps,
+      )
+    else:
+      return self.norm(x)
 
 def group_norm_with_hlfb(
     x: torch.Tensor,
