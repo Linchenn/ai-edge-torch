@@ -32,10 +32,10 @@ class demo(unittest.TestCase):
       return GroupNorm(q, k, v, 40, mask)
 
   args = (
-      torch.randn((2, 4, 8, 16)),
+      torch.randn((2, 16, 8, 4)),
   )
   torch_module = GroupNorm(16, 16, 1e-5, True).eval()
-  src = torch.randn((2, 4, 8, 16))
+  src = torch.randn((2, 16, 8, 4))
   out = torch_module(src)
   edge_model = ai_edge_torch.convert(torch_module, args).export('/tmp/groupNorm.tflite')
 
