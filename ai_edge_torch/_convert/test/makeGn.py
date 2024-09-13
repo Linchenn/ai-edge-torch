@@ -21,7 +21,6 @@ import unittest
 import torch
 
 import ai_edge_torch
-from ai_edge_torch.convert import conversion_utils as cutils
 from ai_edge_torch.testing import model_coverage
 from ai_edge_torch.generative.layers.normalization import GroupNorm  # NOQA
 
