@@ -23,6 +23,21 @@ from torch import nn
 import torch.nn.functional as F
 
 
+class GeGLU(nn.Module):
+  """GeGLU is an activation function which is a variant of GELU.
+
+  GeGLU(x) = (xW+b) * GELU(xV+c)
+  See: https://arxiv.org/abs/2002.05202v1
+  """
+  def __init__(self, d_in: int, d_out: int):
+    super().__init__()
+    self.proj = nn.Linear(d_in, d_out * 2)
+
+  def forward(self, x: torch.Tensor):
+    x, gate = self.proj(x).chunk(2, dim=-1)
+    return x * F.gelu(gate)
+
+
 def build_glu(
     act: Callable[[torch.Tensor], torch.Tensor], gate_is_front: bool = False
 ) -> Callable[[torch.Tensor], torch.Tensor]:
@@ -151,7 +166,7 @@ def get_activation(config: cfg.ActivationConfig):
     # See: https://github.com/hendrycks/GELUs
     return lambda x: x * F.sigmoid(1.702 * x)
   elif config.type == cfg.ActivationType.GE_GLU:
-    return build_glu(F.gelu, config.gate_is_front)
+    return GeGLU(config.dim_in, config.dim_out)
   elif config.type == cfg.ActivationType.RELU:
     return F.relu
   elif config.type == cfg.ActivationType.SILU_GLU:
