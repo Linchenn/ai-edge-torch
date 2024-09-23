@@ -184,7 +184,7 @@ def group_norm_with_hlfb(
   x = torch.permute(x, (0, 2, 3, 1))
 
   builder = StableHLOCompositeBuilder(
-      name="odml.group_norm", attr={"num_groups": num_groups, "eps": eps}
+      name="odml.group_norm", attr={"num_groups": num_groups, "eps": eps, "reductionreduction_axes": 3}
   )
   x, w, b = builder.mark_inputs(x, w, b)
   x = torch.permute(x, (0, 3, 1, 2))
@@ -216,7 +216,7 @@ def layer_norm_with_hlfb(
   Returns:
     The output tensor of Layer Normalization.
   """
-  builder = StableHLOCompositeBuilder(name="odml.layer_norm", attr={"eps": eps})
+  builder = StableHLOCompositeBuilder(name="odml.group_norm", attr={"num_groups": 1, "eps": eps})
   x, w, b = builder.mark_inputs(x, w, b)
   if use_input_shape:
     normalized_shape = x.shape
