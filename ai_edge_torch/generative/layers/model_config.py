@@ -64,7 +64,7 @@ class NormalizationConfig:
   """Normalizater parameters."""
 
   type: NormalizationType = NormalizationType.NONE
-  enable_hlfb: bool = False
+  enable_hlfb: bool = True
   epsilon: float = 1e-5
   zero_centered: bool = False
   # Number of groups used in group normalization.
