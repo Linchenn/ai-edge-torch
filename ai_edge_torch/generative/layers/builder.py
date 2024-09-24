@@ -29,6 +29,7 @@ class GeGLU(nn.Module):
   GeGLU(x) = (xW+b) * GELU(xV+c)
   See: https://arxiv.org/abs/2002.05202v1
   """
+
   def __init__(self, d_in: int, d_out: int):
     super().__init__()
     self.proj = nn.Linear(d_in, d_out * 2)
@@ -38,34 +39,19 @@ class GeGLU(nn.Module):
     return x * F.gelu(gate)
 
 
-def build_glu(
-    act: Callable[[torch.Tensor], torch.Tensor], gate_is_front: bool = False
-) -> Callable[[torch.Tensor], torch.Tensor]:
-  """Builds an activation function with GLU (Gated Linear Unit).
+class SwiGLU(nn.Module):
+  """SwiGLU is an activation function which is a variant of GLU.
 
-  If gate_is_front is True,
-    f(x) = act(x) * y
-  otherwise,
-    f(x) = x * act(y),
-  where x is the first half of the input and y is the second half of the input.
+  SwiGLU is same as SiLU_GLU, because The SiLU function is also known as the
+  swish function.
 
-  Args:
-    act (Callable[[torch.Tensor], torch.Tensor]): activation function to apply
-      to the gate.
-    gate_is_front: whether the gate is in front half of the input. Other part is
-      the output in GLU.
-
-  Returns:
-    A callable activation function with GLU.
+  SwiGLU(x) = Swish(xW+b) * (xV+c)
+  See: https://paperswithcode.com/method/swiglu
   """
 
-  def _glu(x):
+  def forward(self, x: torch.Tensor):
     x, y = x.chunk(2, dim=-1)
-    if gate_is_front:
-      return act(x) * y
-    return x * act(y)
-
-  return _glu
+    return F.silu(x) * y
 
 
 def build_norm(dim: int, config: cfg.NormalizationConfig):
@@ -170,6 +156,6 @@ def get_activation(config: cfg.ActivationConfig):
   elif config.type == cfg.ActivationType.RELU:
     return F.relu
   elif config.type == cfg.ActivationType.SILU_GLU:
-    return build_glu(F.silu, config.gate_is_front)
+    return SwiGLU()
   else:
     raise ValueError("Unsupported activation type.")
