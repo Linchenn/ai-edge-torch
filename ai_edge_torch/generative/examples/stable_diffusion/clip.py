@@ -128,7 +128,7 @@ def get_model_config() -> cfg.ModelConfig:
       embedding_dim=embedding_dim,
       block_configs=block_config,
       final_norm_config=norm_config,
-      enable_hlfb=True,
+      enable_hlfb=False,
   )
 
   return config
